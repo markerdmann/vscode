@@ -23,6 +23,7 @@ import { DisposableStore, toDisposable } from 'vs/base/common/lifecycle';
 import { IPCExtHostConnection, writeExtHostConnection, SocketExtHostConnection } from 'vs/workbench/services/extensions/common/extensionHostEnv';
 import { IConfigurationService } from 'vs/platform/configuration/common/configuration';
 
+// Constructs the environment variables for the extension host process, including configuration and language settings
 export async function buildUserEnvironment(startParamsEnv: { [key: string]: string | null } = {}, withUserShellEnvironment: boolean, language: string, environmentService: IServerEnvironmentService, logService: ILogService, configurationService: IConfigurationService): Promise<IProcessEnvironment> {
 	const nlsConfig = await getNLSConfiguration(language, environmentService.userDataPath);
 
@@ -67,6 +68,7 @@ export async function buildUserEnvironment(startParamsEnv: { [key: string]: stri
 	return env;
 }
 
+// Represents the data associated with an extension host connection, including the socket and initial data chunk
 class ConnectionData {
 	constructor(
 		public readonly socket: NodeSocket | WebSocketNodeSocket,
@@ -103,6 +105,7 @@ class ConnectionData {
 	}
 }
 
+// Manages the connection between the main VS Code process and the extension host process
 export class ExtensionHostConnection {
 
 	private _onClose = new Emitter<void>();
@@ -145,6 +148,7 @@ export class ExtensionHostConnection {
 		this._logService.error(`${this._logPrefix}${_str}`);
 	}
 
+	// Pipes data between the extension host socket and the client socket, forwarding events and handling cleanup
 	private async _pipeSockets(extHostSocket: net.Socket, connectionData: ConnectionData): Promise<void> {
 
 		const disposables = new DisposableStore();
@@ -174,6 +178,7 @@ export class ExtensionHostConnection {
 		}
 	}
 
+	// Sends the socket connection to the extension host process after draining outstanding writes
 	private async _sendSocketToExtensionHost(extensionHostProcess: cp.ChildProcess, connectionData: ConnectionData): Promise<void> {
 		// Make sure all outstanding writes have been drained before sending the socket
 		await connectionData.socketDrain();
